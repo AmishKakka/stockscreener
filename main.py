@@ -1,23 +1,22 @@
-import time
-import streamlit as st
-import pandas as pd
+from imports import pd, st
 
 def submitQuery():
     raw_query = st.session_state.rawQuery
     queries = raw_query.split("&")
     for query in queries:
         print(query.strip())
-    data = {
-        "Column 1": [raw_query, f"{raw_query} + A", f"{raw_query} + B"],
-        "Column 2": [1, 2, 3],
-        "Column 3": [4, 5, 6],
-    }
-    st.session_state["result_table"] = pd.DataFrame(data)
+    if raw_query != "":
+        st.session_state["result_table"] = pd.DataFrame(data_to_show)
     
 #   Start of the main page elements.
 st.title("Stock Screener")
 left, right = st.columns(2, gap="large", 
                          vertical_alignment='top', border=True)
+
+data = pd.read_csv("stocksData.csv")
+data_to_show = data[["Symbol", "Shortname", "Marketcap", "Volume", "Previousclose", "Dividendyield", "Trailingpe",
+                     "Returnonequity", "Grossprofits", "Freecashflow", "Earningsgrowth", "Revenuegrowth", 
+                     "Pricetobook", "Totalrevenue", "Debttoequity", "Revenuepershare", "Profitmargins", "Ebitdamargins"]]
 
 with right:
     st.write("Example query:")
@@ -40,5 +39,6 @@ with left:
 #   Conditionally display the table below the button
 if "result_table" in st.session_state:
     st.write("Results:")
-    st.table(st.session_state["result_table"])
+    st.dataframe(st.session_state["result_table"],
+                 width=2000, height=1000)
     
