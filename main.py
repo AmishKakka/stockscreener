@@ -9,8 +9,8 @@ def submitQuery():
     print(query)
     if raw_query != "":
         filtered_df = data.query(query)
-        filtered_df['Symbol'] = filtered_df['Symbol'].apply(
-            lambda x: f'<a href="https://finance.yahoo.com/quote/{x}" target="_blank">{x}</a>')
+        # filtered_df['Symbol'] = filtered_df['Symbol'].apply(
+        #     lambda x: f'<a href="https://finance.yahoo.com/quote/{x}" target="_blank">{x}</a>')
         data_to_show = filtered_df[columns_to_show]
         st.session_state["result_table"] = pd.DataFrame(data_to_show)
     
@@ -18,7 +18,7 @@ def submitQuery():
 #   Start of the main page elements.
 st.set_page_config(layout="wide")
 st.title("Stock Screener")
-left, right = st.columns(2, gap="large", 
+left, middle, right = st.columns([0.5, 0.2, 0.3], gap="medium", 
                          vertical_alignment='top', border=True)
 
 data = pd.read_csv("stocksData.csv")
@@ -27,6 +27,13 @@ columns_to_show = ["Symbol", "Shortname", "Marketcap", "Volume", "Previousclose"
                      "Pricetobook", "Totalrevenue", "Debttoequity", "Revenuepershare", "Profitmargins", "Ebitdamargins"]
 
 with right:
+    st.markdown('''
+                **Marketcap**: In order of 100 Million USD. 
+                **Previousclose**: In USD.  
+                **Revenuegrowth, Earningsgrowth, Profitmargins**: are in percentage.  
+                **Operatingcashflow, Freecashflow, Totalrevenue**: are in 100 Million USD.''')
+
+with middle:
     st.write("Example query:")
     multi = '''
     Marketcap > 1000 &  
@@ -41,12 +48,13 @@ with left:
     st.text_area(
         "Enter your query:",
         key="rawQuery",
-        placeholder="Type your query here")
+        placeholder="Type your query here", height=85)
     st.button("Show Results", key="submit", on_click=submitQuery)
 
 #   Conditionally display the table below the button
 if "result_table" in st.session_state:
     st.write("Results:")
-    with st.container(border=True,height=700):
-        st.markdown(st.session_state["result_table"].to_html(escape=False), unsafe_allow_html=True)
-    
+    st.dataframe(st.session_state["result_table"], 
+                 height=min(700, 35*len(st.session_state["result_table"])),
+                 hide_index=True)
+
