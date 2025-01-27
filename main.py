@@ -2,29 +2,37 @@ from imports import pd, st
 
 def submitQuery():
     raw_query = st.session_state.rawQuery
-    queries = raw_query.split("&")
-    for query in queries:
-        print(query.strip())
+    queries = [i.strip("\n") for i in raw_query.split("&")]
+    # for query in queries:
+    #     print(query.strip())
+    query = " & ".join(queries)
+    print(query)
     if raw_query != "":
+        filtered_df = data.query(query)
+        filtered_df['Symbol'] = filtered_df['Symbol'].apply(
+            lambda x: f'<a href="https://finance.yahoo.com/quote/{x}" target="_blank">{x}</a>')
+        data_to_show = filtered_df[columns_to_show]
         st.session_state["result_table"] = pd.DataFrame(data_to_show)
     
+
 #   Start of the main page elements.
+st.set_page_config(layout="wide")
 st.title("Stock Screener")
 left, right = st.columns(2, gap="large", 
                          vertical_alignment='top', border=True)
 
 data = pd.read_csv("stocksData.csv")
-data_to_show = data[["Symbol", "Shortname", "Marketcap", "Volume", "Previousclose", "Dividendyield", "Trailingpe",
+columns_to_show = ["Symbol", "Shortname", "Marketcap", "Volume", "Previousclose", "Dividendyield", "Trailingpe",
                      "Returnonequity", "Grossprofits", "Freecashflow", "Earningsgrowth", "Revenuegrowth", 
-                     "Pricetobook", "Totalrevenue", "Debttoequity", "Revenuepershare", "Profitmargins", "Ebitdamargins"]]
+                     "Pricetobook", "Totalrevenue", "Debttoequity", "Revenuepershare", "Profitmargins", "Ebitdamargins"]
 
 with right:
     st.write("Example query:")
     multi = '''
-    market_cap > 1000000 &  
-    current price > 10 &  
-    Price to Earnings ratio < 15 &  
-    Sales growth last 5 years > 10%    
+    Marketcap > 1000 &  
+    Previousclose > 10 &  
+    Profitmargins > 10 &  
+    Earningsgrowth > 10    
     '''
     st.markdown(multi)
     
@@ -39,6 +47,6 @@ with left:
 #   Conditionally display the table below the button
 if "result_table" in st.session_state:
     st.write("Results:")
-    st.dataframe(st.session_state["result_table"],
-                 width=2000, height=1000)
+    with st.container(border=True,height=700):
+        st.markdown(st.session_state["result_table"].to_html(escape=False), unsafe_allow_html=True)
     
