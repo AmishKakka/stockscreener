@@ -1,4 +1,4 @@
-#!/Users/amish130437/Desktop/StockScreener/stockENV/bin/python
+#!/Users/amish130437/Desktop/StockScreener/stockENV/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys
